@@ -35,3 +35,15 @@ def render_consumer():
     references = ['about ref', 'self care ref', 'resources ref']
     for i in range(len(references)):
         st.write(f'{i+1}. {references[i]}')
+
+    st.write('---')
+
+    with st.container():
+            subcol1, subcol2, subcol3 = st.columns([2,1,1])
+            with subcol1:
+               st.markdown("<h5 style='padding-top: 2%; text-align: right;'>Download as: </h2>",
+                           unsafe_allow_html=True)
+            with subcol2:
+               st.button('PDF')
+            with subcol3:
+               pass
