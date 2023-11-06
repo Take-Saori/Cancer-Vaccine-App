@@ -37,7 +37,7 @@ def download_csv(df):
       )
 
 
-# --- USER AUTHENTICATION ---
+# --- USER AUTHENTICATION ---------------------------------------
 names = ["John Smith", "Satoshi Nakamoto"]
 usernames = ["jsmith", "snakamoto"]
 
@@ -63,7 +63,7 @@ if authentication_status == False:
 if authentication_status == None:
     st.warning("Please enter your username and password")
 
-
+#---------------------------------------------------------------
 
 
 if authentication_status:
@@ -77,8 +77,8 @@ if authentication_status:
          st.markdown("<div style='padding-top: 10%;'></div>",
                               unsafe_allow_html=True)
          option = st.selectbox(
-            "Select Cancer type",
-            ('Lung', 'Throat', 'idk'),
+            "Select Cancer Type",
+            ('---', 'Lung', 'Throat', 'idk'),
             placeholder="Select Cancer Type",
          )
 
@@ -96,42 +96,54 @@ if authentication_status:
       with col3:
          st.markdown("<div style='padding-top: 37%;'></div>",
                               unsafe_allow_html=True)
-         st.button('Search')
+         search = st.button('Search')
+
+   # Error prompts to direct user
+   if option == '---':
+      st.info('Please select an option for Cancer Type in the dropdown.')
+
+   if uploaded_file is None:
+      st.info('Please upload CSV file to search for protein sequence.')
+
+   if uploaded_file is not None and not search:
+      st.info('Please click \'Search\' to search for protein sequence.')
+
+   
+   # Once file is uploaded and search is clicked, 
+   if uploaded_file is not None and search:
+      tab1, tab2 = st.tabs(["Researcher View", "Consumer View"])
+
+      with tab1:
+         st.markdown("<h2 style='text-align: center;\
+                     text-decoration: underline;\
+                     padding-bottom: 7%;'> Consolidated possible protein binding</h2>",
+                     unsafe_allow_html=True)
+
+         # Placeholder csv file, remove later
+         csv_filename = 'streamlit/test_data.csv'
+         df = pd.read_csv(csv_filename)
+
+         col1, col2, col3 = st.columns([1,2,1])
+         with col1:
+            pass
+         with col2:
+            with st.container():
+               subcol1, subcol2, subcol3 = st.columns([2,1,1])
+               with subcol1:
+                  st.markdown("<h5 style='padding-top: 2%;'>Download as: </h2>",
+                              unsafe_allow_html=True)
+               with subcol2:
+                  download_csv(df)
+               with subcol3:
+                  download_excel(df)
+         with col3:
+            pass
 
 
-   tab1, tab2 = st.tabs(["Researcher View", "Consumer View"])
-
-   with tab1:
-      st.markdown("<h2 style='text-align: center;\
-                  text-decoration: underline;\
-                  padding-bottom: 7%;'> Consolidated possible protein binding</h2>",
-                  unsafe_allow_html=True)
-
-      # Placeholder csv file, remove later
-      csv_filename = 'streamlit/test_data.csv'
-      df = pd.read_csv(csv_filename)
-
-      col1, col2, col3 = st.columns([1,2,1])
-      with col1:
-         pass
-      with col2:
-         with st.container():
-            subcol1, subcol2, subcol3 = st.columns([2,1,1])
-            with subcol1:
-               st.markdown("<h5 style='padding-top: 2%;'>Download as: </h2>",
-                           unsafe_allow_html=True)
-            with subcol2:
-               download_csv(df)
-            with subcol3:
-               download_excel(df)
-      with col3:
-         pass
+         # I am assuming the csv file loaded have the following column names. Will change later.
+         df = df.rename(columns={'protein_seq': 'Protein Sequence', 'score': 'Score'})
+         st.table(df)
 
 
-      # I am assuming the csv file loaded have the following column names. Will change later.
-      df = df.rename(columns={'protein_seq': 'Protein Sequence', 'score': 'Score'})
-      st.table(df)
-
-
-   with tab2:
-      render_consumer()
+      with tab2:
+         render_consumer()
