@@ -1,5 +1,4 @@
 import streamlit as st
-from streamlit_player import st_player
 
 def render_consumer():
 
