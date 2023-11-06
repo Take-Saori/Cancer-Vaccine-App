@@ -3,6 +3,7 @@ import streamlit_authenticator as stauth
 import pandas as pd
 import io
 import pickle
+from Consumer import render_consumer
 
 @st.cache_data
 def convert_df(df):
@@ -66,6 +67,8 @@ if authentication_status == None:
 
 
 if authentication_status:
+   authenticator.logout('Logout', 'sidebar')
+   st.sidebar.title(f'Welcome {name}')
 
    with st.container():
       col1, col2, col3 = st.columns([1,3,1])
@@ -128,3 +131,7 @@ if authentication_status:
       # I am assuming the csv file loaded have the following column names. Will change later.
       df = df.rename(columns={'protein_seq': 'Protein Sequence', 'score': 'Score'})
       st.table(df)
+
+
+   with tab2:
+      render_consumer()
