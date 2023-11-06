@@ -67,8 +67,8 @@ if authentication_status == None:
 
 
 if authentication_status:
-   authenticator.logout('Logout', 'sidebar')
    st.sidebar.title(f'Welcome {name}')
+   authenticator.logout('Logout', 'sidebar')
 
    with st.container():
       col1, col2, col3 = st.columns([1,3,1])
