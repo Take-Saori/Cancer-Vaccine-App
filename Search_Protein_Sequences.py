@@ -42,7 +42,7 @@ names = ["John Smith", "Satoshi Nakamoto"]
 usernames = ["jsmith", "snakamoto"]
 
 # load hashed passwords
-file_path = "streamlit/authentication/hashed_pw.pkl"
+file_path = "authentication/hashed_pw.pkl"
 with open(file_path, "rb") as file:
 # with file_path.open("rb") as file:
     hashed_passwords = pickle.load(file)
