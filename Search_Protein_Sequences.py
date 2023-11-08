@@ -3,6 +3,7 @@ import streamlit_authenticator as stauth
 import pandas as pd
 import io
 import pickle
+import json
 from Consumer import render_consumer
 
 @st.cache_data
@@ -38,20 +39,25 @@ def download_csv(df):
 
 
 # --- USER AUTHENTICATION ---------------------------------------
-names = ["John Smith", "Satoshi Nakamoto"]
-usernames = ["jsmith", "snakamoto"]
 
-# load hashed passwords
+# Load the names and corresponding usernames from the json file
+file_path = "authentication/user_dict.json"
+with open(file_path, 'r') as fp:
+    user_dict = json.load(fp)
+    
+names = user_dict['names']
+usernames = user_dict['usernames']
+
+# Load hashed passwords
 file_path = "authentication/hashed_pw.pkl"
 with open(file_path, "rb") as file:
-# with file_path.open("rb") as file:
     hashed_passwords = pickle.load(file)
 
 credentials = {"usernames":{}}
         
 for uname,name,pwd in zip(usernames,names,hashed_passwords):
-   user_dict = {"name": name, "password": pwd}
-   credentials["usernames"].update({uname: user_dict})
+   user_pwd_dict = {"name": name, "password": pwd}
+   credentials["usernames"].update({uname: user_pwd_dict})
 
 authenticator = stauth.Authenticate(credentials, "researcher_access", "abcdef", cookie_expiry_days=30)
 
@@ -65,7 +71,7 @@ if authentication_status == None:
 
 #---------------------------------------------------------------
 
-
+# --- If login successful --------------------------------------
 if authentication_status:
    st.sidebar.title(f'Welcome {name}')
    authenticator.logout('Logout', 'sidebar')
