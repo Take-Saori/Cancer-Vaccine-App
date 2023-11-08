@@ -120,7 +120,7 @@ if authentication_status:
                      unsafe_allow_html=True)
 
          # Placeholder csv file, remove later
-         csv_filename = 'streamlit/test_data.csv'
+         csv_filename = 'test_data.csv'
          df = pd.read_csv(csv_filename)
 
          col1, col2, col3 = st.columns([1,2,1])
