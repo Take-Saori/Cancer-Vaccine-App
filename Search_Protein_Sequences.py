@@ -70,6 +70,9 @@ if authentication_status:
    st.sidebar.title(f'Welcome {name}')
    authenticator.logout('Logout', 'sidebar')
 
+   st.header("Search Protein Sequences")
+   st.markdown("<h4 style='padding-bottom: 5%;'>Select cancer type and upload protein sequences to search for possible compatible protein sequences.</h4>", unsafe_allow_html=True)
+
    with st.container():
       col1, col2, col3 = st.columns([1,3,1])
 
