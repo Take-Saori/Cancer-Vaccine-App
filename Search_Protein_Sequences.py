@@ -5,6 +5,7 @@ import io
 import pickle
 import json
 from Consumer import render_consumer
+from utils import binding_predictor as b_pred
 
 @st.cache_data
 def convert_df(df):
@@ -36,6 +37,9 @@ def download_csv(df):
          file_name='data.csv',
          mime='text/csv',
       )
+
+if "display_prediction" not in st.session_state:
+   st.session_state.display_prediction = False
 
 
 # --- USER AUTHENTICATION ---------------------------------------
@@ -77,30 +81,24 @@ if authentication_status:
    authenticator.logout('Logout', 'sidebar')
 
    st.header("Search Protein Sequences")
-   st.markdown("<h4 style='padding-bottom: 5%;'>Select cancer type and upload protein sequences to search for possible compatible protein sequences.</h4>", unsafe_allow_html=True)
+   st.markdown("<h4 style='padding-bottom: 5%;'>Upload Peptide list and Cell lines to search for possible compatible protein sequences.</h4>", unsafe_allow_html=True)
 
    with st.container():
-      col1, col2, col3 = st.columns([1,3,1])
+      col1, col2, col3 = st.columns([3,3,1])
 
       with col1:
-         st.markdown("<div style='padding-top: 10%;'></div>",
-                              unsafe_allow_html=True)
-         option = st.selectbox(
-            "Select Cancer Type",
-            ('---', 'Lung', 'Throat', 'idk'),
-            placeholder="Select Cancer Type",
-         )
+         peptides_df = st.file_uploader("Upload Peptide List excel sheet", ['.xlsx'],
+                                          help='Please upload excel sheet with list of peptide.')
+         if peptides_df is not None:
+            # To read file as bytes:
+            peptides_df = pd.read_excel(peptides_df, engine='openpyxl')
 
       with col2:
-         uploaded_file = st.file_uploader("Upload Protein Sequence csv file", ['.csv'],
-                                          help='Please upload csv file with protein sequences.')
-         if uploaded_file is not None:
+         cell_lines_df = st.file_uploader("Upload Cell Lines excel sheet", ['.xlsx'],
+                                          help='Please upload excel sheet with list of Cell lines.')
+         if cell_lines_df is not None:
             # To read file as bytes:
-            bytes_data = uploaded_file.getvalue()
-
-            #  # Can be used wherever a "file-like" object is accepted:
-            #  dataframe = pd.read_csv(uploaded_file)
-            #  st.write(dataframe)
+            cell_lines_df = pd.read_excel(cell_lines_df, engine='openpyxl')
 
       with col3:
          st.markdown("<div style='padding-top: 37%;'></div>",
@@ -108,51 +106,61 @@ if authentication_status:
          search = st.button('Search')
 
    # Error prompts to direct user
-   if option == '---':
-      st.info('Please select an option for Cancer Type in the dropdown.')
+   if peptides_df is None:
+      st.info('Please upload Peptide List excel sheet.')
 
-   if uploaded_file is None:
-      st.info('Please upload CSV file to search for protein sequence.')
+   if cell_lines_df is None:
+      st.info('Please upload Cell Lines excel sheet.')
 
-   if uploaded_file is not None and not search:
+   if peptides_df is not None and cell_lines_df is not None and not search and st.session_state.display_prediction == False:
       st.info('Please click \'Search\' to search for protein sequence.')
 
    
    # Once file is uploaded and search is clicked, 
-   if uploaded_file is not None and search:
-      tab1, tab2 = st.tabs(["Researcher View", "Consumer View"])
+   if peptides_df is not None and cell_lines_df is not None:
+      if search or st.session_state.display_prediction == True:
 
-      with tab1:
-         st.markdown("<h2 style='text-align: center;\
-                     text-decoration: underline;\
-                     padding-bottom: 7%;'> Consolidated possible protein binding</h2>",
-                     unsafe_allow_html=True)
+         with st.spinner('Predicting possible protein binding...'):
+            prediction_df = b_pred.get_binding_prediction(peptides_df, cell_lines_df)
+            prediction_df.sort_values(by='prediction_percentile', inplace=True)
+            prediction_df.reset_index(drop=True, inplace=True)
+            st.session_state.display_prediction = True
 
-         # Placeholder csv file, remove later
-         csv_filename = 'test_data.csv'
-         df = pd.read_csv(csv_filename)
+         tab1, tab2 = st.tabs(["Researcher View", "Consumer View"])
 
-         col1, col2, col3 = st.columns([1,2,1])
-         with col1:
-            pass
-         with col2:
-            with st.container():
-               subcol1, subcol2, subcol3 = st.columns([2,1,1])
-               with subcol1:
-                  st.markdown("<h5 style='padding-top: 2%;'>Download as: </h2>",
-                              unsafe_allow_html=True)
-               with subcol2:
-                  download_csv(df)
-               with subcol3:
-                  download_excel(df)
-         with col3:
-            pass
+         with tab1:
+            st.markdown("<h2 style='text-align: center;\
+                        text-decoration: underline;\
+                        padding-bottom: 7%;'> Consolidated possible protein binding</h2>",
+                        unsafe_allow_html=True)
+
+            col1, col2, col3 = st.columns([1,2,1])
+            with col1:
+               pass
+            with col2:
+               with st.container():
+                  subcol1, subcol2, subcol3 = st.columns([2,1,1])
+                  with subcol1:
+                     st.markdown("<h5 style='padding-top: 2%;'>Download as: </h2>",
+                                 unsafe_allow_html=True)
+                  with subcol2:
+                     download_csv(prediction_df)
+                  with subcol3:
+                     download_excel(prediction_df)
+            with col3:
+               pass
+
+            # I am assuming the csv file loaded have the following column names. Will change later.
+            df = prediction_df.rename(columns={'peptide': 'Peptide',
+                                             'allele': 'Allele',
+                                             'prediction': 'Prediction',
+                                             'prediction_low': 'Prediction Low',
+                                             'prediction_high': 'Prediction High',
+                                             'prediction_percentile': 'Prediction Percentile',
+                                             })
+            
+            st.dataframe(df[:100])
 
 
-         # I am assuming the csv file loaded have the following column names. Will change later.
-         df = df.rename(columns={'protein_seq': 'Protein Sequence', 'score': 'Score'})
-         st.table(df)
-
-
-      with tab2:
-         render_consumer()
+         with tab2:
+            render_consumer()
