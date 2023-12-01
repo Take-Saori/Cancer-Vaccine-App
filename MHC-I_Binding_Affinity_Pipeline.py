@@ -79,7 +79,19 @@ if authentication_status:
    st.sidebar.title(f'Welcome {name}')
    authenticator.logout('Logout', 'sidebar')
 
-   st.header("Search Protein Sequences")
+   st.header("MHC-I Binding Affinity Pipeline")
+   st.write('The tools in this group take amino acid sequences and MHC alleles as input to predict the strength of the peptide : MHC interaction. To make comparisons between alleles\
+            and methods more standardized, a percentile rank score is also returned where lower indicates stronger binding. The percentile rank is the fraction of peptides drawn\
+            randomly from Uniprot that would bind as well as or better than the current peptide.')
+   st.write('*Industry standard MHCFlurry, NetMHCPan & NetMHCPan-EL models are available. More models will be made available in the next release.\
+            The IEDB currently recommends using the percentile rank as the metric for ranking binding predictions. A percentile rank of <= 1\% has been\
+            demonstrated to cover 80\% of the immune response for many alleles.*')
+   
+   st.subheader('MHCFlurry')
+   st.write('MHCflurry implements class I peptide/MHC binding affinity prediction. The current version provides pan-MHC I predictors supporting any MHC allele\
+               of known sequence. MHCflurry also includes two expermental predictors, an "antigen processing" predictor that attempts to model MHC alleleindependent effects such as proteosomal cleavage and a "presentation" predictor that integrates processing predictions with binding affinity\
+               predictions to give a composite "presentation score." Both models are trained on mass spec-identified MHC ligands.')
+
    st.markdown("<h4 style='padding-bottom: 5%;'>Upload Peptide list and Cell lines to search for possible compatible protein sequences.</h4>", unsafe_allow_html=True)
 
    with st.container():
