@@ -15,7 +15,10 @@ def get_tumour_pred_result(image_data):
     unsafe_allow_html=True
     )
 
-st.header('Tumour Image Detection')
+st.header('Tumour Prediction')
+st.write('*Ensembled stacked Neural Nets models trained on carcinoma, sarcoma, myeloma, leukemia, lymphoma, with a 90.6\% accuracy on unseen test data.*')
+st.write('**\*Please be aware that the following model is not constitute as medical advice and serves solely as an indicator of the potential presence of a tumour. It\
+            is strongly recommended to seek confirmation through the analysis of a qualified pathologist.**')
 
 st.markdown('<h4>Upload image to detect for tumour.</h4>', unsafe_allow_html=True)
 
@@ -28,14 +31,14 @@ if image_file is None:
 
 else:
     image = image_file.read()
-    col1, col2, col3 = st.columns([1,3,1])
+
+    get_tumour_pred_result(image)
+    st.write('---')
+
+    col1, col2 = st.columns(2)
     with col1:
-        pass
-    with col2:
-        get_tumour_pred_result(image)
-        st.write('---')
-        st.markdown("<h4 style='text-align: center;text-decoration: underline;'>Uploaded image</h4>", unsafe_allow_html=True)
         st.image(image, use_column_width=True)
-    with col3:
+        st.markdown("<h4 style='text-align: center;text-decoration: underline;'>Original image</h4>", unsafe_allow_html=True)
+    with col2:
         pass
     
