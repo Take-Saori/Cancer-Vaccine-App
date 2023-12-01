@@ -91,6 +91,8 @@ if authentication_status:
    st.write('MHCflurry implements class I peptide/MHC binding affinity prediction. The current version provides pan-MHC I predictors supporting any MHC allele\
                of known sequence. MHCflurry also includes two expermental predictors, an "antigen processing" predictor that attempts to model MHC alleleindependent effects such as proteosomal cleavage and a "presentation" predictor that integrates processing predictions with binding affinity\
                predictions to give a composite "presentation score." Both models are trained on mass spec-identified MHC ligands.')
+   
+   st.write('---')
 
    st.markdown("<h4 style='padding-bottom: 5%;'>Upload Peptide list and Cell lines to search for possible compatible protein sequences.</h4>", unsafe_allow_html=True)
 
