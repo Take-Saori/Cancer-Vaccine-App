@@ -6,9 +6,78 @@ import plotly.express as px
 df = pd.read_csv('allele_data_utils/Cleaned_AlleleFrequencies_Temp.csv')
 
 def get_all_allele():
-    return tuple(df.Allele.unique())
+    all_allele_list = list(df.Allele.unique())
+    all_allele_list = [x.replace("['", "") for x in all_allele_list]
+    all_allele_list = [x.replace("']", "") for x in all_allele_list]
+    return tuple(all_allele_list)
 
-def filter_and_analyze_with_expected_population_size(df, country=None, region=None, continent=None):
+def get_all_continent():
+    all_continent = list(df.Continent.unique())
+    all_continent = [x.replace("['", "") for x in all_continent]
+    all_continent = [x.replace("']", "") for x in all_continent]
+    return tuple(all_continent)
+
+def get_all_region():
+    all_region = list(df.Region.unique())
+    all_region = [x.replace("['", "") for x in all_region]
+    all_region = [x.replace("']", "") for x in all_region]
+    return tuple(all_region)
+
+def get_all_country():
+    return tuple(df.Country.unique())
+
+def get_unique_studies_num():
+    return df['Population'].nunique()
+
+def get_regions_num():
+    return df['Region'].nunique()
+
+def get_countries_num():
+    return df['Country'].nunique()
+
+def get_pop_per_region_fig():
+    # Number of populations per region
+    populations_per_region = df.groupby('Region').nunique()['Population']
+    populations_per_region_sorted = populations_per_region.sort_values(ascending=False)
+
+    # Create a DataFrame with the sorted data
+    data = pd.DataFrame({'Region': populations_per_region_sorted.index, 'Population': populations_per_region_sorted.values})
+
+    # Plot the bar chart using Plotly Express
+    fig = px.bar(data, x='Region', y='Population',
+                color_discrete_sequence=['blue'])
+
+    return fig
+
+def get_pop_per_continent_fig():
+    # Number of populations per continent
+    populations_per_continent = df.groupby('Continent').nunique()['Population']
+    populations_per_continent_sorted = populations_per_continent.sort_values(ascending=False)
+
+    # Create a DataFrame with the sorted data
+    data = pd.DataFrame({'Continent': populations_per_continent_sorted.index, 'Population': populations_per_continent_sorted.values})
+
+    # Plot the bar chart using Plotly Express
+    fig = px.bar(data, x='Continent', y='Population',
+                color_discrete_sequence=['blue'])
+
+    return fig
+
+def get_pop_per_country_fig():
+    # Number of populations per country
+    populations_per_country = df.groupby('Country').nunique()['Population']
+    populations_per_country_sorted = populations_per_country.sort_values(ascending=False)
+
+    # Create a DataFrame with the sorted data
+    data = pd.DataFrame({'Country': populations_per_country_sorted.index, 'Population': populations_per_country_sorted.values})
+
+    # Plot the bar chart using Plotly Express
+    fig = px.bar(data, x='Country', y='Population',
+                color_discrete_sequence=['blue'])
+
+    return fig
+
+def filter_and_analyze_with_expected_population_size(country=None, region=None, continent=None):
     # Filter based on the provided parameters
     if country:
         df = df[df['Country'] == country]
