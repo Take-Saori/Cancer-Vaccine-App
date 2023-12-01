@@ -4,7 +4,6 @@ import pandas as pd
 import io
 import pickle
 import json
-from Consumer import render_consumer
 from utils import binding_predictor as b_pred
 
 @st.cache_data
@@ -23,7 +22,7 @@ def download_excel(df):
     st.download_button(
         label="Excel",
         data=output,
-        file_name='data.xlsx',  # You can change the file name here
+        file_name='protein_sequences.xlsx',  # You can change the file name here
         key='excel-download'
     )
 
@@ -34,7 +33,7 @@ def download_csv(df):
    st.download_button(
          label="CSV",
          data=csv,
-         file_name='data.csv',
+         file_name='protein_sequences.csv',
          mime='text/csv',
       )
 
@@ -115,6 +114,7 @@ if authentication_status:
    if peptides_df is not None and cell_lines_df is not None and not search and st.session_state.display_prediction == False:
       st.info('Please click \'Search\' to search for protein sequence.')
 
+   st.write('---')
    
    # Once file is uploaded and search is clicked, 
    if peptides_df is not None and cell_lines_df is not None:
@@ -126,41 +126,36 @@ if authentication_status:
             prediction_df.reset_index(drop=True, inplace=True)
             st.session_state.display_prediction = True
 
-         tab1, tab2 = st.tabs(["Researcher View", "Consumer View"])
+         st.markdown("<h2 style='text-align: center;\
+                     text-decoration: underline;'>Consolidated possible protein binding</h2>",
+                     unsafe_allow_html=True)
+         st.markdown("<p style='text-align: center;\
+                     padding-bottom: 5%;'>(Only top 100 sequences are shown. Please download the sequences to see the whole output.)</p>",
+                     unsafe_allow_html=True)
 
-         with tab1:
-            st.markdown("<h2 style='text-align: center;\
-                        text-decoration: underline;\
-                        padding-bottom: 7%;'> Consolidated possible protein binding</h2>",
-                        unsafe_allow_html=True)
+         col1, col2, col3 = st.columns([1,2,1])
+         with col1:
+            pass
+         with col2:
+            with st.container():
+               subcol1, subcol2, subcol3 = st.columns([2,1,1])
+               with subcol1:
+                  st.markdown("<h5 style='padding-top: 2%;'>Download as: </h2>",
+                              unsafe_allow_html=True)
+               with subcol2:
+                  download_csv(prediction_df)
+               with subcol3:
+                  download_excel(prediction_df)
+         with col3:
+            pass
 
-            col1, col2, col3 = st.columns([1,2,1])
-            with col1:
-               pass
-            with col2:
-               with st.container():
-                  subcol1, subcol2, subcol3 = st.columns([2,1,1])
-                  with subcol1:
-                     st.markdown("<h5 style='padding-top: 2%;'>Download as: </h2>",
-                                 unsafe_allow_html=True)
-                  with subcol2:
-                     download_csv(prediction_df)
-                  with subcol3:
-                     download_excel(prediction_df)
-            with col3:
-               pass
-
-            # I am assuming the csv file loaded have the following column names. Will change later.
-            df = prediction_df.rename(columns={'peptide': 'Peptide',
-                                             'allele': 'Allele',
-                                             'prediction': 'Prediction',
-                                             'prediction_low': 'Prediction Low',
-                                             'prediction_high': 'Prediction High',
-                                             'prediction_percentile': 'Prediction Percentile',
-                                             })
-            
-            st.dataframe(df[:100])
-
-
-         with tab2:
-            render_consumer()
+         # I am assuming the csv file loaded have the following column names. Will change later.
+         df = prediction_df.rename(columns={'peptide': 'Peptide',
+                                          'allele': 'Allele',
+                                          'prediction': 'Prediction',
+                                          'prediction_low': 'Prediction Low',
+                                          'prediction_high': 'Prediction High',
+                                          'prediction_percentile': 'Prediction Percentile',
+                                          })
+         
+         st.dataframe(df[:100])
