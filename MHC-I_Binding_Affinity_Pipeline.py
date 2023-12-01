@@ -4,7 +4,7 @@ import pandas as pd
 import io
 import pickle
 import json
-from utils import binding_predictor as b_pred
+from binding_pred_utils import binding_predictor as b_pred
 
 @st.cache_data
 def convert_df(df):
