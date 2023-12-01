@@ -1,5 +1,6 @@
 import streamlit as st
-import altair as alt
+import plotly.express as px
+import pandas as pd
 from allele_data_utils import allele_analysis as aa
 
 if 'geo_searched' not in st.session_state:
@@ -25,6 +26,7 @@ st.plotly_chart(aa.get_pop_per_continent_fig())
 st.subheader('Number of studies per Region')
 st.plotly_chart(aa.get_pop_per_region_fig())
 st.subheader('Number of studies per Country')
+st.write('(Only the top 20 countries are displayed.)')
 st.plotly_chart(aa.get_pop_per_country_fig())
 st.write('---')
 
@@ -34,20 +36,23 @@ with col1:
     continent = st.selectbox(
         'Select Continent',
         aa.get_all_continent(),
-        placeholder="---"
+        index=None,
+        placeholder="---",
     )
 with col2:
     region = st.selectbox(
         'Select Region',
         aa.get_all_region(),
-        placeholder="---"
+        index=None,
+        placeholder="---",
     )
 
 with col3:
     country = st.selectbox(
         'Select Country',
         aa.get_all_country(),
-        placeholder="---"
+        index=None,
+        placeholder="---",
     )
 
 with col4:
@@ -58,15 +63,29 @@ with col4:
 st.write('**Only 1 filter is allowed for each search.**')
 
 filter_list = [continent, region, country]
-if filter_list.count('---') > 1 and filter_allele_search: # more than 1 filter is selected
+
+if filter_list.count(None) == 3 and filter_allele_search: # nothing is selected
+    st.warning('Please select a filter.')
+
+elif filter_list.count(None) == 1 and filter_allele_search: # more than 1 filter is selected
     st.warning('Please select only 1 filter at a time.')
 
-if filter_list.count('---') == 1 and (filter_allele_search or st.session_state.filter_allele_searched):
+elif filter_list.count(None) == 2 and (filter_allele_search or st.session_state.filter_allele_searched):
     st.session_state.filter_allele_searched = True
 
-    _, _, top_20_series = aa.filter_and_analyze_with_expected_population_size(country, region, continent)
+    exp_pop_size_dict = aa.filter_and_analyze_with_expected_population_size(country, region, continent)
+    
+    if len(exp_pop_size_dict["Top 20 HLA Alleles by Expected Population Size"]) == 0:
+        st.write("No HLA Alleles found")
 
-    st.bar_chart(top_20_series)
+    else:
+        # Create a DataFrame with the sorted data
+        data = pd.DataFrame({'Allele': exp_pop_size_dict["Top 20 HLA Alleles by Expected Population Size"].index, 'Value': exp_pop_size_dict["Top 20 HLA Alleles by Expected Population Size"].values})
+
+        # Plot the bar chart using Plotly Express
+        fig = px.bar(data, x='Allele', y='Value',
+                    color_discrete_sequence=['blue'])
+        st.plotly_chart(fig)
 
 st.write('---')
 

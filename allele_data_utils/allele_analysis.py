@@ -7,20 +7,20 @@ df = pd.read_csv('allele_data_utils/Cleaned_AlleleFrequencies_Temp.csv')
 
 def get_all_allele():
     all_allele_list = list(df.Allele.unique())
-    all_allele_list = [x.replace("['", "") for x in all_allele_list]
-    all_allele_list = [x.replace("']", "") for x in all_allele_list]
     return tuple(all_allele_list)
 
 def get_all_continent():
     all_continent = list(df.Continent.unique())
     all_continent = [x.replace("['", "") for x in all_continent]
     all_continent = [x.replace("']", "") for x in all_continent]
+    all_continent = [x.replace("', '", ", ") for x in all_continent]
     return tuple(all_continent)
 
 def get_all_region():
     all_region = list(df.Region.unique())
     all_region = [x.replace("['", "") for x in all_region]
     all_region = [x.replace("']", "") for x in all_region]
+    all_region = [x.replace("', '", ", ") for x in all_region]
     return tuple(all_region)
 
 def get_all_country():
@@ -43,6 +43,10 @@ def get_pop_per_region_fig():
     # Create a DataFrame with the sorted data
     data = pd.DataFrame({'Region': populations_per_region_sorted.index, 'Population': populations_per_region_sorted.values})
 
+    data['Region'] = data['Region'].str.replace("['", "")
+    data['Region'] = data['Region'].str.replace("']", "")
+    data['Region'] = data['Region'].str.replace("', '", "")
+
     # Plot the bar chart using Plotly Express
     fig = px.bar(data, x='Region', y='Population',
                 color_discrete_sequence=['blue'])
@@ -57,6 +61,10 @@ def get_pop_per_continent_fig():
     # Create a DataFrame with the sorted data
     data = pd.DataFrame({'Continent': populations_per_continent_sorted.index, 'Population': populations_per_continent_sorted.values})
 
+    data['Continent'] = data['Continent'].str.replace("['", "")
+    data['Continent'] = data['Continent'].str.replace("']", "")
+    data['Continent'] = data['Continent'].str.replace("', '", "")
+
     # Plot the bar chart using Plotly Express
     fig = px.bar(data, x='Continent', y='Population',
                 color_discrete_sequence=['blue'])
@@ -70,6 +78,7 @@ def get_pop_per_country_fig():
 
     # Create a DataFrame with the sorted data
     data = pd.DataFrame({'Country': populations_per_country_sorted.index, 'Population': populations_per_country_sorted.values})
+    data = data[:20]
 
     # Plot the bar chart using Plotly Express
     fig = px.bar(data, x='Country', y='Population',
@@ -78,6 +87,7 @@ def get_pop_per_country_fig():
     return fig
 
 def filter_and_analyze_with_expected_population_size(country=None, region=None, continent=None):
+    df = pd.read_csv('allele_data_utils/Cleaned_AlleleFrequencies_Temp.csv')
     # Filter based on the provided parameters
     if country:
         df = df[df['Country'] == country]
